@@ -1,11 +1,23 @@
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from pymongo import MongoClient
-import os
+import gridfs
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get environment variables
+MONGO_URI = os.getenv('MONGO_URI')
+DB_NAME = os.getenv('DB_NAME')
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 # MongoDB setup
-client = MongoClient('your_mongodb_uri')
-db = client['your_database_name']
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+fs = gridfs.GridFS(db)
+
 notes_collection = db['notes']
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -43,12 +55,13 @@ def subject_callback(update: Update, context: CallbackContext) -> None:
     
     note = notes_collection.find_one({"year": year, "branch": "CSE", "semester": semester, "subject": subject})
     if note:
-        query.message.reply_document(document=open(note['pdf_url'], 'rb'), caption=f"Notes for {subject}")
+        pdf = fs.get_last_version(note['pdf_filename'])
+        query.message.reply_document(document=pdf, filename=note['pdf_filename'], caption=f"Notes for {subject}")
     else:
         query.edit_message_text(text="No notes found for this subject.")
 
 def main() -> None:
-    updater = Updater("your_telegram_bot_token")
+    updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))
@@ -61,4 +74,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-      
+    
