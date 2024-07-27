@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get MongoDB URI and database name from environment variables
-MONGO_URI = os.getenv('mongodb+srv://csfiles:4A1J7KnLVpyvSzqT@csfiles.mxf9rgf.mongodb.net/?retryWrites=true&w=majority&appName=csfiles')
+MONGO_URI = os.getenv('mongodb+srv://hmbot1371:3A4vDx3GsoZYAcYT@hyperxrenamer.4oopdv4.mongodb.net/?retryWrites=true&w=majority')
 DB_NAME = os.getenv('Notes')
 
 client = MongoClient(MONGO_URI)
